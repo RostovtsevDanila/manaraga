@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field
 
 from src.apis.base import BaseFlightsApi
 
-
 Message = SystemMessage | HumanMessage | AIMessage
 
 
@@ -32,5 +31,3 @@ class SessionManager:
     def set_flightapi_key(self, client_id: int, key: str) -> None:
         session = self.get(client_id)
         session.flightapi_key = key or ''
-
-

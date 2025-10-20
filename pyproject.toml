@@ -50,7 +50,7 @@ lint.select = [
 lint.ignore = [
   "Q000", "Q003", "ISC001", "RUF003", "COM812", "RUF029", "PLR0912", "PLR6201", "S104", "FIX002", "PT003", "FBT001",
   "FBT002", "TRY003", "EM101", "EM102", "G004", "PLR1702", "PLR0915", "TRY300", "PLR0904", "PLR0916", "PLR0913",
-  "PLR0917", "S608", "PLR0914", "PLR0911"
+  "PLR0917", "S608", "PLR0914", "PLR0911", "PTH110", "PTH123", "PTH120", "PTH103"
 ]
 lint.unfixable = ["F401"]
 lint.preview = true

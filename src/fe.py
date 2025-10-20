@@ -46,7 +46,7 @@ def register_ui(session_manager: SessionManager, service: FlightAssistantService
 
                 service.persist_history(session, question, answer)
                 session_manager.set_selected(client_id, selected_option)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 ui.notify(f'Error: {e}', color='negative')
             finally:
                 message_container.remove(spinner)
@@ -57,13 +57,17 @@ def register_ui(session_manager: SessionManager, service: FlightAssistantService
         ui.query('.nicegui-content').classes('w-full flex items-center justify-center')
 
         with ui.row().classes('w-full max-w-2xl mx-auto items-center justify-center mt-4'):
-            key_input = ui.input(
-                label='FlightAPI key',
-                placeholder='Please enter FlightAPI key...',
-                password=True,
-                password_toggle_button=True,
-                value=session.flightapi_key,
-            ).props('dense outlined clearable').classes('w-full')
+            key_input = (
+                ui.input(
+                    label='FlightAPI key',
+                    placeholder='Please enter FlightAPI key...',
+                    password=True,
+                    password_toggle_button=True,
+                    value=session.flightapi_key,
+                )
+                .props('dense outlined clearable')
+                .classes('w-full')
+            )
 
             def on_key_change(e):
                 session_manager.set_flightapi_key(client_id, e.value or '')
@@ -76,15 +80,24 @@ def register_ui(session_manager: SessionManager, service: FlightAssistantService
         with ui.tab_panels(tabs, value=chat_tab).classes('w-full max-w-2xl mx-auto flex-grow items-stretch'):
             message_container = ui.tab_panel(chat_tab).classes('items-stretch')
 
-        with ui.footer().classes('bg-white'), ui.column().classes('w-full max-w-3xl mx-auto my-6 items-center'):
+        with ui.footer().classes('bg-white'), ui.column().classes('w-full max-w-3xl mx-auto my-6 items-center'):  # noqa: SIM117
             with ui.row().classes('w-full no-wrap items-center justify-center'):
                 placeholder = 'Enter your question here...'
-                selector = ui.select(
-                    options=list(ALLOWED_AIRPORT_CODES),
-                    with_input=False,
-                    label='Airport',
-                    value=session.selected,
-                ).props('dense outlined').classes('min-w-[180px]')
+                selector = (
+                    ui.select(
+                        options=list(ALLOWED_AIRPORT_CODES),
+                        with_input=False,
+                        label='Airport',
+                        value=session.selected,
+                    )
+                    .props('dense outlined')
+                    .classes('min-w-[180px]')
+                )
 
                 selector.on_value_change(lambda e: session_manager.set_selected(client_id, e.value))
-                text = ui.input(placeholder=placeholder).props('rounded outlined input-class=mx-3').classes('w-full self-center').on('keydown.enter', send)
+                text = (
+                    ui.input(placeholder=placeholder)
+                    .props('rounded outlined input-class=mx-3')
+                    .classes('w-full self-center')
+                    .on('keydown.enter', send)
+                )

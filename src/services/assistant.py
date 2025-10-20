@@ -1,10 +1,12 @@
 import json
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
-from typing import Any, AsyncGenerator
+from typing import Any
 
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
+from src.apis.flightapi import FlightApi
 from src.configs import (
     CACHE_FILE_PATH,
     CACHE_TTL_SECONDS,
@@ -14,7 +16,6 @@ from src.configs import (
     OPENAI_MODEL,
     SYSTEM_PROMPT,
 )
-from src.apis.flightapi import FlightApi
 from src.services.sessions import SessionData
 
 
@@ -22,7 +23,8 @@ class FlightAssistantService:
     def __init__(self) -> None:
         pass
 
-    async def ensure_dependencies(self, session: SessionData, user_key: str) -> None:
+    @staticmethod
+    async def ensure_dependencies(session: SessionData, user_key: str) -> None:
         if session.llm is None:
             session.llm = ChatOpenAI(
                 base_url=OPENAI_BASE_URL,
@@ -37,7 +39,8 @@ class FlightAssistantService:
                 cache_dump_path=CACHE_FILE_PATH,
             )
 
-    async def build_messages(self, session: SessionData, airport: str, question: str) -> list:
+    @staticmethod
+    async def build_messages(session: SessionData, airport: str, question: str) -> list:
         today = await session.flight_api.get_today_flights(airport)
         arrivals_dataset = today['arrivals']
         departures_dataset = today['departures']
@@ -52,21 +55,25 @@ class FlightAssistantService:
             ensure_ascii=False,
         )
 
-        messages = [
-            SystemMessage(content=SYSTEM_PROMPT),
-            SystemMessage(content=f'SELECTED_AIRPORT={airport}'),
-            SystemMessage(content=f'DATASET_JSON={dataset_json}'),
-        ] + session.history + [HumanMessage(content=question)]
+        return (
+            [  # noqa: RUF005
+                SystemMessage(content=SYSTEM_PROMPT),
+                SystemMessage(content=f'SELECTED_AIRPORT={airport}'),
+                SystemMessage(content=f'DATASET_JSON={dataset_json}'),
+            ]
+            + session.history
+            + [HumanMessage(content=question)]
+        )
 
-        return messages
-
-    async def stream_answer(self, session: SessionData, messages: list) -> AsyncGenerator[str, Any]:
+    @staticmethod
+    async def stream_answer(session: SessionData, messages: list) -> AsyncGenerator[str, Any]:
         response = ''
         async for chunk in session.llm.astream(messages):
             response += chunk.content
             yield response
 
-    def persist_history(self, session: SessionData, question: str, answer: str) -> None:
+    @staticmethod
+    def persist_history(session: SessionData, question: str, answer: str) -> None:
         session.history.append(HumanMessage(content=question))
         session.history.append(AIMessage(content=answer))
 

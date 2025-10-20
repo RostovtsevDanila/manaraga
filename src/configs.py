@@ -1,12 +1,11 @@
 import os
-from typing import Set
 
 from pydantic import BaseModel, field_validator
 
 
 class Settings(BaseModel):
     # Flights
-    allowed_airport_codes: Set[str] = {'DXB', 'LHR', 'CDG', 'SIN', 'HKG', 'AMS'}
+    allowed_airport_codes: set[str] = {'DXB', 'LHR', 'CDG', 'SIN', 'HKG', 'AMS'}
     flightapi_base_url: str = 'https://api.flightapi.io'
     cache_ttl_seconds: int = 60 * 60 * 12
     cache_file_path: str = 'tmp/flight_cache.json'
@@ -30,22 +29,21 @@ class Settings(BaseModel):
 
 def load_settings() -> Settings:
     return Settings(
-        openai_api_key=os.getenv('OPENAI_API_KEY', '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'),
+        openai_api_key=os.getenv('OPENAI_API_KEY', ''),
         openai_model=os.getenv('OPENAI_MODEL', 'tngtech/deepseek-r1t2-chimera:free'),
         openai_base_url=os.getenv('OPENAI_BASE_URL', 'https://openrouter.ai/api/v1'),
         flightapi_base_url=os.getenv('FLIGHTAPI_BASE_URL', 'https://api.flightapi.io'),
         cache_ttl_seconds=int(os.getenv('CACHE_TTL_SECONDS', str(60 * 60 * 12))),
         cache_file_path=os.getenv('CACHE_FILE_PATH', 'tmp/flight_cache.json'),
         allowed_airport_codes=set(
-            [it.strip().upper() for it in os.getenv('ALLOWED_AIRPORT_CODES', '').split(',') if it.strip()] or
-            ['DXB', 'LHR', 'CDG', 'SIN', 'HKG', 'AMS']
+            [it.strip().upper() for it in os.getenv('ALLOWED_AIRPORT_CODES', '').split(',') if it.strip()]
+            or ['DXB', 'LHR', 'CDG', 'SIN', 'HKG', 'AMS']
         ),
         memory_len_messages=int(os.getenv('MEMORY_LEN_MESSAGES', '40')),
         system_prompt=os.getenv('SYSTEM_PROMPT', Settings().system_prompt),
     )
 
 
-# Keep backward-compatible constants for existing imports
 _settings = load_settings()
 
 ALLOWED_AIRPORT_CODES = _settings.allowed_airport_codes

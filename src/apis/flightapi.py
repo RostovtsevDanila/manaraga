@@ -4,13 +4,18 @@ from typing import Any, Literal
 
 import httpx
 
-from src.configs import ALLOWED_AIRPORT_CODES, FLIGHTAPI_BASE_URL
 from src.apis.base import BaseFlightsApi
+from src.configs import ALLOWED_AIRPORT_CODES, FLIGHTAPI_BASE_URL
 from src.services.inmemory_cache import InMemoryTTLCache
 
 
 class FlightApi(BaseFlightsApi):
-    def __init__(self, api_key: str, cache_ttl_seconds: int = 60 * 60 * 12, cache_dump_path: str | None = 'tmp/flight_cache.json'):
+    def __init__(
+        self,
+        api_key: str,
+        cache_ttl_seconds: int = 60 * 60 * 12,
+        cache_dump_path: str | None = 'tmp/flight_cache.json',
+    ):
         if not api_key:
             raise ValueError('FlightAPI key is required')
 
@@ -46,7 +51,6 @@ class FlightApi(BaseFlightsApi):
                 return cached
             raise
 
-
     async def fetch_schedule(self, iata: str, mode: Literal['arrivals', 'departures'], day: int = 1) -> dict[str, Any]:
         if iata not in ALLOWED_AIRPORT_CODES:
             raise ValueError(f'Invalid airport code. Allowed codes: {ALLOWED_AIRPORT_CODES}')
@@ -65,20 +69,36 @@ class FlightApi(BaseFlightsApi):
 
     @staticmethod
     def normalize_flight_data(raw_data: dict[str, Any]) -> list[dict[str, Any]]:
-        schedule_data = raw_data.get('airport', {}).get('pluginData', {}).get('schedule', {}).get('arrivals', {}).get('data', []) or raw_data.get('airport', {}).get('pluginData', {}).get('schedule', {}).get('departures', {}).get('data', [])
+        schedule_data = raw_data.get('airport', {}).get('pluginData', {}).get('schedule', {}).get('arrivals', {}).get(
+            'data', []
+        ) or raw_data.get('airport', {}).get('pluginData', {}).get('schedule', {}).get('departures', {}).get('data', [])
 
         norm: list[dict[str, Any]] = []
         for it in schedule_data:
             flight = it.get('flight', {})
             airline = flight.get('airline') or {}
-            flight_num = flight.get('identification', {}).get('number', {}).get('default') or flight.get('identification', {}).get('number', {}).get('alternative')
+            flight_num = flight.get('identification', {}).get('number', {}).get('default') or flight.get(
+                'identification', {}
+            ).get('number', {}).get('alternative')
             dep = flight.get('airport', {}).get('origin') or {}
             arr = flight.get('airport', {}).get('destination') or {}
             time = flight.get('time') or {}
-            sched_dep = flight.get('scheduledDepartureTime') or (time.get('scheduled') or {}).get('departure') or time.get('scheduled')
+            sched_dep = (
+                flight.get('scheduledDepartureTime')
+                or (time.get('scheduled') or {}).get('departure')
+                or time.get('scheduled')
+            )
             est_dep = flight.get('estimatedDepartureTime') or (time.get('estimated') or {}).get('departure')
-            sched_arr = flight.get('scheduledArrivalTime') or (time.get('scheduled') or {}).get('arrival') or time.get('scheduled')
-            est_arr = flight.get('estimatedArrivalTime') or (time.get('estimated') or {}).get('arrival') or (time.get('real') or {}).get('utc')
+            sched_arr = (
+                flight.get('scheduledArrivalTime')
+                or (time.get('scheduled') or {}).get('arrival')
+                or time.get('scheduled')
+            )
+            est_arr = (
+                flight.get('estimatedArrivalTime')
+                or (time.get('estimated') or {}).get('arrival')
+                or (time.get('real') or {}).get('utc')
+            )
             status = flight.get('status')
             aircraft = flight.get('aircraft') or {}
 
@@ -126,5 +146,3 @@ class FlightApi(BaseFlightsApi):
             'arrivals': self.normalize_flight_data(arrivals_raw),
             'departures': self.normalize_flight_data(departures_raw),
         }
-
-
