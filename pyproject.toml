@@ -1,0 +1,107 @@
+[tool.poetry]
+name = "manaraga"
+version = "0.1.0"
+description = "Test task"
+authors = [
+    "Rostovtsev Danila <rostovtsev.danila@gmail.com>",
+]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+httpx = "^0.28.1"
+nicegui = "^3.0.4"
+html-sanitizer = "^2.6.0"
+langchain-openai = "^0.3.35"
+langchain = "^0.3.27"
+pydantic = "^2.10.3"
+uvicorn = "0.23.2"
+
+
+[poetry.group.dev.dependencies]
+ipdb = "^0.13.13"
+pytest = "^7.2.2"
+pytest-cov = "^4.1.0"
+pytest-asyncio = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+line_length = 120
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.ruff]
+lint.select = [
+  "A","B","E","F","G","W","I","N","UP","YTT",
+  "S","BLE","FBT","COM", "C4", "T100", "EM",
+  "EXE", "ISC", "ICN", "LOG", "INP", "PIE",
+  "T20", "PYI", "PT", "Q003", "Q004", "RSE",
+  "RET", "SLOT", "SIM", "TID", "TCH", "INT",
+  "PTH", "FIX", "PD", "PGH", "PL", "TRY",
+  "FLY", "NPY", "PERF", "FURB", "RUF",
+]
+lint.ignore = [
+  "Q000", "Q003", "ISC001", "RUF003", "COM812", "RUF029", "PLR0912", "PLR6201", "S104", "FIX002", "PT003", "FBT001",
+  "FBT002", "TRY003", "EM101", "EM102", "G004", "PLR1702", "PLR0915", "TRY300", "PLR0904", "PLR0916", "PLR0913",
+  "PLR0917", "S608", "PLR0914", "PLR0911"
+]
+lint.unfixable = ["F401"]
+lint.preview = true
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.format]
+preview = true
+quote-style = "single"
+line-ending = "auto"
+skip-magic-trailing-comma = false
+exclude = [
+  "*.ipynb"
+]
+
+[tool.ruff.lint.isort]
+split-on-trailing-comma = true
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402", "S101", "PLR2004", "S105", "S106", "PLR0913", "PLR0917"]
+"*" = ["RUF001", "RUF002", "RUF013"]
+"bot/models/settings.py" = ["E501"]
+"data_prepare/*" = [
+  "T201", "PLR2004", "BLE001", "B020", "SIM108", "UP038", "PD002", "PD901", "E722", "F841", "S106",  "S507", "F401"
+]
+
+[tool.mypy]
+python_version = "3.12"
+exclude = '(tests)'
+disable_error_code = [
+  'import-untyped',
+]
+allow_redefinition = false
+check_untyped_defs = true
+ignore_errors = false
+ignore_missing_imports = false
+implicit_reexport = false
+local_partial_types = true
+strict_optional = true
+strict_equality = true
+no_implicit_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+warn_unreachable = true
+warn_no_return = true
+show_error_codes = true
+
+[tool.coverage.run]
+omit = ["tests/*", "**/*/__init__.py"]
+source = ["api"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
