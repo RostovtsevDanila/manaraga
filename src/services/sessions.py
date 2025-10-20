@@ -1,6 +1,6 @@
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.apis.base import BaseFlightsApi
 
@@ -13,6 +13,10 @@ class SessionData(BaseModel):
     flightapi_key: str = ''
     llm: ChatOpenAI | None = None
     flight_api: BaseFlightsApi | None = None
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
 
 
 class SessionManager:
